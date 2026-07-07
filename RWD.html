@@ -20,6 +20,7 @@
             --hc-aspect: 16 / 10;        /* 輪播區長寬比（依實際輪播圖比例調整） */
             --hc-perspective: 1200px;    /* 3D 透視深度 */
             --hc-img-max-width: clamp(90px, 38vw, 150px);  /* 單張輪播卡片上限寬；全斷點同比例，PC 不刻意放大。卡片直式 2:3(1208x1818)，高=寬x1.5 */
+            --hc-navbar: 103px;          /* PC 上方 navbar 高度（用於把內容收在一屏內；依實際調整） */
 
             /* 背景圖（art-direction：桌機 / 手機分別換） */
             --hc-bg-desktop: url('https://res.cloudinary.com/lmbtctmx/image/upload/v1783397768/260701bg.png');
@@ -143,10 +144,50 @@
             opacity: 1;
         }
 
-        /* ============ 桌機 (>900px)：每張卡片站畫面 1/7 ============ */
+        /* ============ 桌機 (>900px)：每張卡片站畫面 1/7 + 整組收在一屏內 ============ */
         @media (min-width: 901px) {
             .hoho-carousel {
                 --hc-img-max-width: calc(100vw / 7);
+            }
+
+            /* 整組在 navbar 以下的可用高度內垂直置中，不需捲動 */
+            .hoho-carousel .hc-main {
+                min-height: calc(100vh - var(--hc-navbar));
+                justify-content: center;
+                gap: clamp(8px, 2vh, 24px);
+                padding-block: clamp(8px, 2vh, 24px);
+            }
+
+            /* 用 vh 綁高度，取代 16/10 撐出的 750px 空高；overflow 讓 stage 自我裁切，卡片永不外溢到標題/內文 */
+            .hoho-carousel .hc-carousel-wrapper {
+                aspect-ratio: auto;
+                height: clamp(320px, 50vh, 580px);
+                width: 100%;
+                overflow: hidden;
+            }
+
+            /* 卡片放到最大：靜止時中央卡片放大(≈1.375×)後剛好填滿 stage；彈跳峰值瞬間超出由 overflow 裁掉 */
+            .hoho-carousel .hc-carousel-img {
+                max-height: 72%;
+            }
+
+            /* 標題改以高度為準，避免吃掉版面高 */
+            .hoho-carousel .hc-title-top {
+                width: auto;
+                max-height: clamp(60px, 11vh, 150px);
+                max-width: min(90vw, 600px);
+            }
+
+            .hoho-carousel .hc-title-bottom {
+                width: auto;
+                max-height: clamp(60px, 12vh, 170px);
+                max-width: min(90vw, 780px);
+            }
+
+            /* 按鈕在矮螢幕也不過大 */
+            .hoho-carousel .hc-bottom-buttons button img {
+                max-height: clamp(40px, 7vh, 75px);
+                width: auto;
             }
         }
 
@@ -251,9 +292,11 @@
                 // 統一斷點（與 CSS media query 對齊）：>900 桌機、>600 平板、其餘手機
                 breakpoints: { desktop: 900, tablet: 600 },
                 configs: {
-                    desktop: { radius: 450, angleStep: Math.PI / 6, scaleStep: 0.08, yAmplitude: 100, skewAngle: 10 },
-                    tablet:  { radius: 300, angleStep: Math.PI / 6, scaleStep: 0.10, yAmplitude: 80,  skewAngle: 8 },
-                    mobile:  { radius: 200, angleStep: Math.PI / 8, scaleStep: 0.08, yAmplitude: 60,  skewAngle: 6 }
+                    // 桌機：幾何依 stage 實際尺寸換算（container-relative），任何螢幕都吻合容器
+                    desktop: { mode: 'relative', spreadRatio: 0.30, yRatio: 0.06, perspectiveRatio: 1.1, bounceRatio: 0.35, angleStep: Math.PI / 6, scaleStep: 0.08, skewAngle: 10 },
+                    // 平板/手機：維持原固定 px（不變）
+                    tablet:  { mode: 'absolute', radius: 300, angleStep: Math.PI / 6, scaleStep: 0.10, yAmplitude: 80, skewAngle: 8 },
+                    mobile:  { mode: 'absolute', radius: 200, angleStep: Math.PI / 8, scaleStep: 0.08, yAmplitude: 60, skewAngle: 6 }
                 }
             };
 
@@ -265,6 +308,7 @@
             const bouncePeakZ = parseInt(cssVars.getPropertyValue('--hc-bounce-peak-z')) || 50;
             const bouncePeakScale = parseFloat(cssVars.getPropertyValue('--hc-bounce-peak-scale')) || 1.2;
 
+            const stage = $('.hc-carousel-wrapper');
             const track = $('[data-hc-track]');
             const imgs = Array.from(track.children);
             const totalImgs = imgs.length;
@@ -274,16 +318,47 @@
             let isAnimating = false;
             let isFirstRender = true;
             let resizeTimeout;
+            let currentGeom = null;   // 本次解析出的幾何（供 bounceImage 取用）
 
-            function getConfig() {
+            function getBreakpointConfig() {
                 const w = window.innerWidth;
                 if (w > CONFIG.breakpoints.desktop) return CONFIG.configs.desktop;
                 if (w > CONFIG.breakpoints.tablet) return CONFIG.configs.tablet;
                 return CONFIG.configs.mobile;
             }
 
+            // 依斷點回傳「解析後的 px 幾何」：桌機由 stage 尺寸換算，平板/手機用固定值
+            function getGeometry(sw, sh) {
+                const c = getBreakpointConfig();
+                if (c.mode === 'relative') {
+                    return {
+                        radius: sw * c.spreadRatio,
+                        yAmplitude: sh * c.yRatio,
+                        angleStep: c.angleStep,
+                        scaleStep: c.scaleStep,
+                        skewAngle: c.skewAngle,
+                        perspective: sw * c.perspectiveRatio,
+                        bouncePeakY: -sh * c.bounceRatio
+                    };
+                }
+                return {
+                    radius: c.radius,
+                    yAmplitude: c.yAmplitude,
+                    angleStep: c.angleStep,
+                    scaleStep: c.scaleStep,
+                    skewAngle: c.skewAngle,
+                    perspective: null,          // 回退 CSS 的 --hc-perspective
+                    bouncePeakY: bouncePeakY     // CSS 變數(-400)，維持原樣
+                };
+            }
+
             function updateCarousel() {
-                const { radius, angleStep, scaleStep, yAmplitude, skewAngle } = getConfig();
+                const geom = getGeometry(stage.clientWidth, stage.clientHeight);
+                currentGeom = geom;
+                const { radius, angleStep, scaleStep, yAmplitude, skewAngle } = geom;
+
+                // 桌機依 stage 換算 perspective；平板/手機清掉 inline、回退 CSS
+                stage.style.perspective = geom.perspective != null ? geom.perspective + 'px' : '';
 
                 imgs.forEach((img, i) => {
                     const relativeIndex = (i - currentStartIndex + totalImgs) % totalImgs;
@@ -330,13 +405,15 @@
 
             function bounceImage(img) {
                 let start = null;
+                // 桌機為 stage 高度比例、平板/手機為 CSS 的 -400
+                const peakY = (currentGeom && currentGeom.bouncePeakY != null) ? currentGeom.bouncePeakY : bouncePeakY;
 
                 function animateBounce(timestamp) {
                     if (!start) start = timestamp;
                     const progress = Math.min((timestamp - start) / bounceDuration, 1);
                     const bounce = Math.sin(progress * Math.PI);
 
-                    const translateY = bounce * bouncePeakY;
+                    const translateY = bounce * peakY;
                     const translateZ = bounce * bouncePeakZ;
                     const scale = 1 + (bouncePeakScale - 1) * bounce;
 
