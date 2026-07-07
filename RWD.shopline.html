@@ -150,44 +150,45 @@
                 --hc-img-max-width: calc(100vw / 7);
             }
 
-            /* PC：容器依背景圖(8000×3750)長寬比撐開，圖片以原比例貼合、不被裁切 */
+            /* PC：容器高 = min(寬×3750/8000, 視窗可用高)。內部改用 cqh 依「容器實際高」等比縮放，永不撐破也永不溢屏 */
             .hoho-carousel .hc-main {
                 aspect-ratio: 8000 / 3750;
-                background-size: 100% 100%;
+                max-height: calc(100vh - var(--hc-navbar));
+                background-size: cover;
                 justify-content: center;
-                gap: clamp(16px, 4vh, 48px);
-                padding-block: clamp(8px, 2vh, 24px);
+                gap: clamp(16px, 4cqh, 48px);
+                padding-block: clamp(8px, 2cqh, 24px);
+                container-type: size;   /* 讓子元素的 cqh 對齊本容器高度 */
             }
 
-            /* 用 vh 綁高度，取代 16/10 撐出的 750px 空高；overflow 讓 stage 自我裁切，卡片永不外溢到標題/內文 */
+            /* stage 用容器高的 52% 撐開，overflow 讓 stage 自我裁切，卡片永不外溢 */
             .hoho-carousel .hc-carousel-wrapper {
                 aspect-ratio: auto;
-                height: clamp(320px, 50vh, 580px);
+                height: 52cqh;
                 width: 100%;
                 overflow: hidden;
             }
 
-            /* 卡片放到最大：靜止時中央卡片放大(≈1.375×)後剛好填滿 stage；彈跳峰值瞬間超出由 overflow 裁掉 */
+            /* 卡片：靜止時中央卡片放大(≈1.375×)後剛好填滿 stage 高 */
             .hoho-carousel .hc-carousel-img {
                 max-height: 72%;
             }
 
-            /* 標題改以高度為準，避免吃掉版面高 */
+            /* 標題與按鈕以容器高為基準，總和 ≤ 100%，不撐破 */
             .hoho-carousel .hc-title-top {
                 width: auto;
-                max-height: clamp(60px, 11vh, 150px);
+                max-height: 14cqh;
                 max-width: min(90vw, 600px);
             }
 
             .hoho-carousel .hc-title-bottom {
                 width: auto;
-                max-height: clamp(60px, 12vh, 170px);
+                max-height: 15cqh;
                 max-width: min(90vw, 780px);
             }
 
-            /* 按鈕在矮螢幕也不過大 */
             .hoho-carousel .hc-bottom-buttons button img {
-                max-height: clamp(40px, 7vh, 75px);
+                max-height: 9cqh;
                 width: auto;
             }
         }
