@@ -82,8 +82,8 @@
             height: auto;
             transition: transform var(--hc-transition-time) ease-in-out,
             opacity var(--hc-transition-time) ease-in-out;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            /* 依 PNG 實際輪廓投影，貼合圖內圓角、四角透明處不再露出陰影 */
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
             transform-style: preserve-3d;
             will-change: transform, opacity;
         }
