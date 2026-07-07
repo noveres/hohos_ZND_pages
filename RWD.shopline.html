@@ -150,11 +150,12 @@
                 --hc-img-max-width: calc(100vw / 7);
             }
 
-            /* 整組在 navbar 以下的可用高度內垂直置中，不需捲動 */
+            /* PC：容器依背景圖(8000×3750)長寬比撐開，圖片以原比例貼合、不被裁切 */
             .hoho-carousel .hc-main {
-                min-height: calc(100vh - var(--hc-navbar));
+                aspect-ratio: 8000 / 3750;
+                background-size: 100% 100%;
                 justify-content: center;
-                gap: clamp(8px, 2vh, 24px);
+                gap: clamp(16px, 4vh, 48px);
                 padding-block: clamp(8px, 2vh, 24px);
             }
 
