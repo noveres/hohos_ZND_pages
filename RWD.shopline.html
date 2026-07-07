@@ -28,6 +28,8 @@
 
             display: block;
             width: 100%;
+            position: relative;
+            isolation: isolate;   /* 自成堆疊環境：內部 z-index(1000/1001) 不外洩，避免蓋到平台 cookie 橫幅等 */
         }
 
         /* ---- 版面骨架 ---- */
@@ -175,6 +177,8 @@
             /* 高度上限放寬，讓卡片長到寬度上限(≥1/7)，不再被高度卡住 */
             .hoho-carousel .hc-carousel-img {
                 max-height: 100%;
+                /* 不加投影 */
+                filter: none;
             }
 
             /* 標題：以「畫面寬」為基準，改由設計比例撐開，高度隨自然長寬比 */

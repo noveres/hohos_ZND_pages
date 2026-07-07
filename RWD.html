@@ -28,6 +28,8 @@
 
             display: block;
             width: 100%;
+            position: relative;
+            isolation: isolate;   /* 自成堆疊環境：內部 z-index(1000/1001) 不外洩，避免蓋到平台 cookie 橫幅等 */
         }
 
         /* ---- 版面骨架 ---- */
@@ -244,7 +246,7 @@
 
             .hoho-carousel .hc-title-top {
                 width: clamp(120px, 80vw, 420px);   /* 與內文圖同寬 */
-                margin-top: 3rem;                   /* 上方間距（原 1rem，下移多 2rem） */
+                margin-top: 5rem;                   /* 上方間距（原 1rem，下移多 2rem） */
             }
 
             .hoho-carousel .hc-title-bottom {
