@@ -48,6 +48,7 @@
             background-size: cover;           /* 取代原本 200%，避免溢出 */
             background-position: center center;
             background-repeat: no-repeat;
+
         }
 
         .hoho-carousel .hc-carousel-wrapper {
@@ -80,7 +81,7 @@
             width: auto;
             height: auto;
             transition: transform var(--hc-transition-time) ease-in-out,
-                        opacity var(--hc-transition-time) ease-in-out;
+            opacity var(--hc-transition-time) ease-in-out;
             border-radius: 15px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
             transform-style: preserve-3d;
@@ -162,6 +163,7 @@
                 background-image: var(--hc-bg-mobile);
                 background-size: cover;
                 padding-bottom: 5vw;
+                gap: 3rem;
             }
 
             .hoho-carousel .hc-carousel-wrapper {
@@ -169,7 +171,8 @@
             }
 
             .hoho-carousel .hc-title-top {
-                width: clamp(120px, 62vw, 380px);
+                width: clamp(120px, 80vw, 420px);   /* 與內文圖同寬 */
+                margin-top: 1rem;                   /* 上方間距 */
             }
 
             .hoho-carousel .hc-title-bottom {
