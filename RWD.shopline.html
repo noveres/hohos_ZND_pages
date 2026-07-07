@@ -162,11 +162,16 @@
             }
 
             /* stage 撐開；透視已放平、卡片幾乎不放大，改 overflow: visible 讓卡片與投影底部完整不被裁 */
+            /* ⚠️ HACK（非正規做法）：stage 加高並用負的 margin-top 往上頂、z-index 蓋過標題(999)，
+               靠卡片 PNG「上緣半透明」的特性讓重疊看起來自然，藉此向標題區「借」高度換更大的卡片。
+               正常情況各區塊不該互相重疊；若日後換成上緣不透明的素材，需移除此段。 */
             .hoho-carousel .hc-carousel-wrapper {
                 aspect-ratio: auto;
-                height: 90cqh;
+                height: 110cqh;              /* HACK: 借高度放大卡片 */
+                margin-top: -12cqh;          /* HACK: 往上頂，蓋過標題下緣 */
                 width: 100%;
                 overflow: visible;
+                z-index: 1000;               /* HACK: 高於標題 .hc-title-top(999)，卡片才會蓋在上面 */
             }
 
             /* 高度上限放寬，讓卡片長到寬度上限(≥1/7)，不再被高度卡住 */
@@ -181,6 +186,12 @@
                 max-height: none;
                 margin-top: 0.5rem;           /* 往上移（原 4rem） */
                 flex-shrink: 0;               /* 不被壓縮 */
+            }
+
+            /* 讓標題蓋在卡片上方：<picture> 是 flex 子項，給它 z-index 才會疊在 stage(1000) 之上 */
+            .hoho-carousel .hc-main > picture {
+                position: relative;
+                z-index: 1001;                /* 高於 .hc-carousel-wrapper(1000) → 標題覆蓋卡片 */
             }
 
             .hoho-carousel .hc-title-bottom {
@@ -298,7 +309,7 @@
                 breakpoints: { desktop: 900, tablet: 600 },
                 configs: {
                     // 桌機：幾何依 stage 實際尺寸換算（container-relative），任何螢幕都吻合容器
-                    desktop: { mode: 'relative', spreadRatio: 0.42, yRatio: 0.06, perspectiveRatio: 5.0, bounceRatio: 0.15, angleStep: Math.PI / 6, scaleStep: 0.08, skewAngle: 10 },
+                    desktop: { mode: 'relative', spreadRatio: 0.48, yRatio: 0.06, perspectiveRatio: 5.0, bounceRatio: 0.15, angleStep: Math.PI / 6, scaleStep: 0.08, skewAngle: 10 },
                     // 平板/手機：維持原固定 px（不變）
                     tablet:  { mode: 'absolute', radius: 300, angleStep: Math.PI / 6, scaleStep: 0.10, yAmplitude: 80, skewAngle: 8 },
                     mobile:  { mode: 'absolute', radius: 200, angleStep: Math.PI / 8, scaleStep: 0.08, yAmplitude: 60, skewAngle: 6 }
