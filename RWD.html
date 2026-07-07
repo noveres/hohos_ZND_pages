@@ -80,7 +80,7 @@
             width: auto;
             height: auto;
             transition: transform var(--hc-transition-time) ease-in-out,
-                        opacity var(--hc-transition-time) ease-in-out;
+            opacity var(--hc-transition-time) ease-in-out;
             border-radius: 15px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
             transform-style: preserve-3d;
@@ -183,7 +183,10 @@
     </style>
 
     <div class="hc-main">
-        <img src="https://res.cloudinary.com/lmbtctmx/image/upload/v1783339443/260701_BT.png" class="hc-title-top" alt="Title" />
+        <picture>
+            <source media="(max-width: 600px)" srcset="https://res.cloudinary.com/lmbtctmx/image/upload/v1783395156/260701H1title-mobile_e85ztm.png" />
+            <img src="https://res.cloudinary.com/lmbtctmx/image/upload/v1783339443/260701_BT.png" class="hc-title-top" alt="Title" />
+        </picture>
 
         <div class="hc-carousel-wrapper">
             <div class="hc-carousel" data-hc-track>
@@ -213,7 +216,10 @@
         </div>
 
         <div class="hc-bottom-area">
-            <img src="https://res.cloudinary.com/lmbtctmx/image/upload/v1783330201/26070_content.png" class="hc-title-bottom" alt="Title Bottom" />
+            <picture>
+                <source media="(max-width: 600px)" srcset="https://res.cloudinary.com/lmbtctmx/image/upload/v1783395161/260701Contents-mobile_mbnnk9.png" />
+                <img src="https://res.cloudinary.com/lmbtctmx/image/upload/v1783330201/26070_content.png" class="hc-title-bottom" alt="Title Bottom" />
+            </picture>
             <div class="hc-bottom-buttons">
                 <button class="hc-prev" type="button" aria-label="Previous">
                     <img src="https://d6f39ee4.images-7y2.pages.dev/Buttons/LWS_B.png" alt="Previous" />
