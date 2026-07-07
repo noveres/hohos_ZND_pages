@@ -309,7 +309,7 @@
                 breakpoints: { desktop: 900, tablet: 600 },
                 configs: {
                     // 桌機：幾何依 stage 實際尺寸換算（container-relative），任何螢幕都吻合容器
-                    desktop: { mode: 'relative', spreadRatio: 0.72, yRatio: 0.06, perspectiveRatio: 4.0, bounceRatio: 0.15, angleStep: Math.PI / 8, scaleStep: 0.08, skewAngle: 10 },
+                    desktop: { mode: 'relative', spreadRatio: 0.7, yRatio: 0.06, perspectiveRatio: 4.0, bounceRatio: 0.15, angleStep: Math.PI / 8, scaleStep: 0.08, skewAngle: 10, tiltFactor: 0 },
                     // 平板/手機：維持原固定 px（不變）
                     tablet:  { mode: 'absolute', radius: 300, angleStep: Math.PI / 6, scaleStep: 0.10, yAmplitude: 80, skewAngle: 8 },
                     mobile:  { mode: 'absolute', radius: 200, angleStep: Math.PI / 8, scaleStep: 0.08, yAmplitude: 60, skewAngle: 6 }
@@ -353,6 +353,7 @@
                         angleStep: c.angleStep,
                         scaleStep: c.scaleStep,
                         skewAngle: c.skewAngle,
+                        tiltFactor: c.tiltFactor ?? 1,   // 0 = 完全平面（不影響間距）
                         perspective: sw * c.perspectiveRatio,
                         bouncePeakY: -sh * c.bounceRatio
                     };
@@ -363,6 +364,7 @@
                     angleStep: c.angleStep,
                     scaleStep: c.scaleStep,
                     skewAngle: c.skewAngle,
+                    tiltFactor: c.tiltFactor ?? 1,   // 平板/手機未設 → 1（維持原樣）
                     perspective: null,          // 回退 CSS 的 --hc-perspective
                     bouncePeakY: bouncePeakY     // CSS 變數(-400)，維持原樣
                 };
@@ -371,7 +373,7 @@
             function updateCarousel() {
                 const geom = getGeometry(stage.clientWidth, stage.clientHeight);
                 currentGeom = geom;
-                const { radius, angleStep, scaleStep, yAmplitude, skewAngle } = geom;
+                const { radius, angleStep, scaleStep, yAmplitude, skewAngle, tiltFactor } = geom;
 
                 // 桌機依 stage 換算 perspective；平板/手機清掉 inline、回退 CSS
                 stage.style.perspective = geom.perspective != null ? geom.perspective + 'px' : '';
@@ -382,8 +384,8 @@
                     if (relativeIndex < visibleCount) {
                         const baseIndex = relativeIndex - 2;
                         const angle = baseIndex * angleStep;
-                        const x = Math.sin(angle) * radius;
-                        const z = -Math.abs(Math.cos(angle) * radius);
+                        const x = Math.sin(angle) * radius;               // 間距（不受 tiltFactor 影響）
+                        const z = -Math.abs(Math.cos(angle) * radius) * tiltFactor;  // 深度 → tilt 0 時為 0
                         const y = Math.cos(angle) * yAmplitude - yAmplitude;
                         const scale = 1 - Math.abs(baseIndex) * scaleStep;
 
@@ -395,8 +397,9 @@
                         } else {
                             rotateY = -angle * (180 / Math.PI);
                         }
+                        rotateY *= tiltFactor;                            // tilt 0 時不旋轉（完全平面）
 
-                        const skewYAngle = baseIndex < 0 ? -skewAngle : baseIndex > 0 ? skewAngle : 0;
+                        const skewYAngle = (baseIndex < 0 ? -skewAngle : baseIndex > 0 ? skewAngle : 0) * tiltFactor;
 
                         const baseTransform = `translateX(${x}px) translateY(${y}px) translateZ(${-z}px) scale(${scale}) rotateY(${rotateY}deg) skewY(${skewYAngle}deg)`;
 
