@@ -122,7 +122,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: clamp(8px, 2vw, 24px);
+            gap: clamp(8px, 2vw, 26px);
         }
 
         .hoho-carousel .hc-bottom-buttons button {
@@ -181,10 +181,10 @@
 
             /* 標題：以「畫面寬」為基準，改由設計比例撐開，高度隨自然長寬比 */
             .hoho-carousel .hc-title-top {
-                width: calc(100vw * 4 / 7);   /* 縮小：5/7 → 4/7 畫面寬 */
+                width: calc(100vw * 4.8 / 7);
                 max-width: none;
                 max-height: none;
-                margin-top: 0.5rem;           /* 往上移（原 4rem） */
+                margin-top: 2rem;           /* 往上移（原 4rem） */
                 flex-shrink: 0;               /* 不被壓縮 */
             }
 
@@ -200,9 +200,15 @@
                 max-height: none;
             }
 
-            /* 按鈕縮小約 22%（9cqh → 7cqh）；.hc-bottom-buttons 的 gap 不變 */
+            /* 按鈕群：往上移；間距用固定 px（與按鈕大小脫鉤 → 縮小時兩按鈕相對距離不變） */
+            .hoho-carousel .hc-bottom-buttons {
+                margin-top: -1.5cqh;   /* 往上移（可調） */
+                gap: 24px;             /* 固定間距，不隨按鈕縮放改變 */
+            }
+
+            /* 按鈕縮小 25%（7cqh → 5.25cqh） */
             .hoho-carousel .hc-bottom-buttons button img {
-                max-height: 7cqh;
+                max-height: 5.25cqh;
                 width: auto;
             }
         }
@@ -309,7 +315,7 @@
                 breakpoints: { desktop: 900, tablet: 600 },
                 configs: {
                     // 桌機：幾何依 stage 實際尺寸換算（container-relative），任何螢幕都吻合容器
-                    desktop: { mode: 'relative', spreadRatio: 0.7, yRatio: 0.06, perspectiveRatio: 4.0, bounceRatio: 0.15, angleStep: Math.PI / 8, scaleStep: 0.08, skewAngle: 10, tiltFactor: 0.5 },
+                    desktop: { mode: 'relative', spreadRatio: 0.7, yRatio: 0.06, perspectiveRatio: 4.0, bounceRatio: 0.15, angleStep: Math.PI / 8, scaleStep: 0.08, skewAngle: 10, tiltFactor: 0.5, midGapFactor: 0.95 },
                     // 平板/手機：維持原固定 px（不變）
                     tablet:  { mode: 'absolute', radius: 300, angleStep: Math.PI / 6, scaleStep: 0.10, yAmplitude: 80, skewAngle: 8 },
                     mobile:  { mode: 'absolute', radius: 200, angleStep: Math.PI / 8, scaleStep: 0.08, yAmplitude: 60, skewAngle: 6 }
@@ -354,6 +360,7 @@
                         scaleStep: c.scaleStep,
                         skewAngle: c.skewAngle,
                         tiltFactor: c.tiltFactor ?? 1,   // 0 = 完全平面（不影響間距）
+                        midGapFactor: c.midGapFactor ?? 1,   // 中央↔旁邊間距倍率（<1 縮減）
                         perspective: sw * c.perspectiveRatio,
                         bouncePeakY: -sh * c.bounceRatio
                     };
@@ -365,15 +372,30 @@
                     scaleStep: c.scaleStep,
                     skewAngle: c.skewAngle,
                     tiltFactor: c.tiltFactor ?? 1,   // 平板/手機未設 → 1（維持原樣）
+                    midGapFactor: c.midGapFactor ?? 1,   // 未設 → 1（維持原樣）
                     perspective: null,          // 回退 CSS 的 --hc-perspective
                     bouncePeakY: bouncePeakY     // CSS 變數(-400)，維持原樣
                 };
             }
 
+            // 專門縮減「中央↔旁邊」間距的函數：
+            //   只縮第一段(中央→第一張)，其餘段(旁邊→外側)維持原距 → 外側整體跟著往內移、彼此間距不變。
+            //   midGapFactor: 1 = 原始間距；<1 越小中央越靠近旁邊（例如 0.6）；>1 則拉開。
+            function computeCardX(baseIndex, radius, angleStep, midGapFactor) {
+                if (baseIndex === 0) return 0;
+                const sign = Math.sign(baseIndex);
+                const n = Math.abs(baseIndex);
+                const firstGap = Math.sin(angleStep) * radius;              // 中央→第一張 的原始間距
+                const scaledFirst = firstGap * midGapFactor;               // 縮減後的中央間距
+                if (n === 1) return sign * scaledFirst;
+                const outerFromFirst = Math.sin(n * angleStep) * radius - firstGap; // 第一張→本張 的原始距離
+                return sign * (scaledFirst + outerFromFirst);
+            }
+
             function updateCarousel() {
                 const geom = getGeometry(stage.clientWidth, stage.clientHeight);
                 currentGeom = geom;
-                const { radius, angleStep, scaleStep, yAmplitude, skewAngle, tiltFactor } = geom;
+                const { radius, angleStep, scaleStep, yAmplitude, skewAngle, tiltFactor, midGapFactor } = geom;
 
                 // 桌機依 stage 換算 perspective；平板/手機清掉 inline、回退 CSS
                 stage.style.perspective = geom.perspective != null ? geom.perspective + 'px' : '';
@@ -384,7 +406,7 @@
                     if (relativeIndex < visibleCount) {
                         const baseIndex = relativeIndex - 2;
                         const angle = baseIndex * angleStep;
-                        const x = Math.sin(angle) * radius;               // 間距（不受 tiltFactor 影響）
+                        const x = computeCardX(baseIndex, radius, angleStep, midGapFactor);   // 間距（可用 midGapFactor 縮減中央段）
                         const z = -Math.abs(Math.cos(angle) * radius) * tiltFactor;  // 深度 → tilt 0 時為 0
                         const y = Math.cos(angle) * yAmplitude - yAmplitude;
                         const scale = 1 - Math.abs(baseIndex) * scaleStep;
