@@ -427,26 +427,40 @@
                 requestAnimationFrame(animateBounce);
             }
 
+            const prevBtn = $('.hc-prev');
+            const nextBtn = $('.hc-next');
+            // 整段動畫時長：切換過場 + 彈跳；期間鎖住按鈕，避免中斷或連點兩次
+            const lockDuration = transitionTime + bounceDuration;
+
+            function lockButtons() {
+                isAnimating = true;
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+                setTimeout(() => {
+                    isAnimating = false;
+                    prevBtn.disabled = false;
+                    nextBtn.disabled = false;
+                }, lockDuration);
+            }
+
             function handleNext() {
                 if (isAnimating) return;
-                isAnimating = true;
+                lockButtons();
                 currentStartIndex = (currentStartIndex + 1) % totalImgs;
                 isFirstRender = false;
                 updateCarousel();
-                setTimeout(() => { isAnimating = false; }, transitionTime);
             }
 
             function handlePrev() {
                 if (isAnimating) return;
-                isAnimating = true;
+                lockButtons();
                 currentStartIndex = (currentStartIndex - 1 + totalImgs) % totalImgs;
                 isFirstRender = false;
                 updateCarousel();
-                setTimeout(() => { isAnimating = false; }, transitionTime);
             }
 
-            $('.hc-next').addEventListener('click', handleNext);
-            $('.hc-prev').addEventListener('click', handlePrev);
+            nextBtn.addEventListener('click', handleNext);
+            prevBtn.addEventListener('click', handlePrev);
 
             function handleResize() {
                 if (resizeTimeout) clearTimeout(resizeTimeout);
