@@ -144,8 +144,8 @@
             opacity: 1;
         }
 
-        /* ============ 桌機 (>900px)：每張卡片站畫面 1/7 + 整組收在一屏內 ============ */
-        @media (min-width: 901px) {
+        /* ============ 桌機+平板 (>600px)：以 PC 版型為主（平板在下方微調容器高度） ============ */
+        @media (min-width: 601px) {
             .hoho-carousel {
                 --hc-img-max-width: calc(100vw / 5.6);   /* 卡片放大（1/6.2 → ~1/5.6） */
             }
@@ -213,10 +213,19 @@
             }
         }
 
-        /* ============ 平板 (600–900px) ============ */
-        @media (max-width: 900px) {
-            .hoho-carousel .hc-bottom-buttons button img {
-                width: clamp(28px, 7vw, 56px);
+        /* ============ 平板 (601–900px)：沿用 PC 版型，僅微調容器高度 ============ */
+        /* PC 的 .hc-main 用背景比例 8000/3750 會讓窄平板容器過矮，故改「定高」讓 cqh 正常、內容有空間 */
+        @media (min-width: 601px) and (max-width: 900px) {
+            .hoho-carousel .hc-main {
+                aspect-ratio: auto;
+                height: 72vh;            /* 定高：讓 cqh 生效、內容有足夠高度 */
+                max-height: none;
+            }
+
+            /* stage 比 PC 的 110cqh 保守，收在容器內；借高度也少一點 */
+            .hoho-carousel .hc-carousel-wrapper {
+                height: 76cqh;
+                margin-top: -4cqh;
             }
         }
 
