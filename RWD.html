@@ -142,6 +142,13 @@
             opacity: 1;
         }
 
+        /* ============ 桌機 (>900px)：每張卡片站畫面 1/7 ============ */
+        @media (min-width: 901px) {
+            .hoho-carousel {
+                --hc-img-max-width: calc(100vw / 7);
+            }
+        }
+
         /* ============ 平板 (600–900px) ============ */
         @media (max-width: 900px) {
             .hoho-carousel .hc-bottom-buttons button img {
