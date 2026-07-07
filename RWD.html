@@ -147,7 +147,7 @@
         /* ============ 桌機 (>900px)：每張卡片站畫面 1/7 + 整組收在一屏內 ============ */
         @media (min-width: 901px) {
             .hoho-carousel {
-                --hc-img-max-width: calc(100vw / 7);
+                --hc-img-max-width: calc(100vw / 5.6);   /* 卡片放大（1/6.2 → ~1/5.6） */
             }
 
             /* PC：容器高 = min(寬×3750/8000, 視窗可用高)。內部改用 cqh 依「容器實際高」等比縮放，永不撐破也永不溢屏 */
@@ -161,34 +161,37 @@
                 container-type: size;   /* 讓子元素的 cqh 對齊本容器高度 */
             }
 
-            /* stage 用容器高的 52% 撐開，overflow 讓 stage 自我裁切，卡片永不外溢 */
+            /* stage 撐開；透視已放平、卡片幾乎不放大，改 overflow: visible 讓卡片與投影底部完整不被裁 */
             .hoho-carousel .hc-carousel-wrapper {
                 aspect-ratio: auto;
-                height: 52cqh;
+                height: 90cqh;
                 width: 100%;
-                overflow: hidden;
+                overflow: visible;
             }
 
-            /* 卡片：靜止時中央卡片放大(≈1.375×)後剛好填滿 stage 高 */
+            /* 高度上限放寬，讓卡片長到寬度上限(≥1/7)，不再被高度卡住 */
             .hoho-carousel .hc-carousel-img {
-                max-height: 72%;
+                max-height: 100%;
             }
 
-            /* 標題與按鈕以容器高為基準，總和 ≤ 100%，不撐破 */
+            /* 標題：以「畫面寬」為基準，改由設計比例撐開，高度隨自然長寬比 */
             .hoho-carousel .hc-title-top {
-                width: auto;
-                max-height: 14cqh;
-                max-width: min(90vw, 600px);
+                width: calc(100vw * 4 / 7);   /* 縮小：5/7 → 4/7 畫面寬 */
+                max-width: none;
+                max-height: none;
+                margin-top: 0.5rem;           /* 往上移（原 4rem） */
+                flex-shrink: 0;               /* 不被壓縮 */
             }
 
             .hoho-carousel .hc-title-bottom {
-                width: auto;
-                max-height: 15cqh;
-                max-width: min(90vw, 780px);
+                width: calc(100vw * 3 / 7);   /* 3/7 畫面寬 */
+                max-width: none;
+                max-height: none;
             }
 
+            /* 按鈕縮小約 22%（9cqh → 7cqh）；.hc-bottom-buttons 的 gap 不變 */
             .hoho-carousel .hc-bottom-buttons button img {
-                max-height: 9cqh;
+                max-height: 7cqh;
                 width: auto;
             }
         }
@@ -295,7 +298,7 @@
                 breakpoints: { desktop: 900, tablet: 600 },
                 configs: {
                     // 桌機：幾何依 stage 實際尺寸換算（container-relative），任何螢幕都吻合容器
-                    desktop: { mode: 'relative', spreadRatio: 0.35, yRatio: 0.06, perspectiveRatio: 1.1, bounceRatio: 3.5, angleStep: Math.PI / 6, scaleStep: 0.08, skewAngle: 10 },
+                    desktop: { mode: 'relative', spreadRatio: 0.42, yRatio: 0.06, perspectiveRatio: 5.0, bounceRatio: 0.15, angleStep: Math.PI / 6, scaleStep: 0.08, skewAngle: 10 },
                     // 平板/手機：維持原固定 px（不變）
                     tablet:  { mode: 'absolute', radius: 300, angleStep: Math.PI / 6, scaleStep: 0.10, yAmplitude: 80, skewAngle: 8 },
                     mobile:  { mode: 'absolute', radius: 200, angleStep: Math.PI / 8, scaleStep: 0.08, yAmplitude: 60, skewAngle: 6 }
