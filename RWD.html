@@ -83,8 +83,6 @@
             height: auto;
             transition: transform var(--hc-transition-time) ease-in-out,
             opacity var(--hc-transition-time) ease-in-out;
-            /* 依 PNG 實際輪廓投影，貼合圖內圓角、四角透明處不再露出陰影 */
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
             transform-style: preserve-3d;
             will-change: transform, opacity;
         }
@@ -177,6 +175,8 @@
             /* 高度上限放寬，讓卡片長到寬度上限(≥1/7)，不再被高度卡住 */
             .hoho-carousel .hc-carousel-img {
                 max-height: 100%;
+                /* 不加投影 */
+                filter: none;
             }
 
             /* 標題：以「畫面寬」為基準，改由設計比例撐開，高度隨自然長寬比 */
@@ -244,7 +244,7 @@
 
             .hoho-carousel .hc-title-top {
                 width: clamp(120px, 80vw, 420px);   /* 與內文圖同寬 */
-                margin-top: 1rem;                   /* 上方間距 */
+                margin-top: 3rem;                   /* 上方間距（原 1rem，下移多 2rem） */
             }
 
             .hoho-carousel .hc-title-bottom {
@@ -327,7 +327,7 @@
                     desktop: { mode: 'relative', spreadRatio: 0.7, yRatio: 0.06, perspectiveRatio: 4.0, bounceRatio: 0.15, angleStep: Math.PI / 8, scaleStep: 0.08, skewAngle: 10, tiltFactor: 0.5, midGapFactor: 0.95 },
                     // 平板/手機：維持原固定 px（不變）
                     tablet:  { mode: 'absolute', radius: 300, angleStep: Math.PI / 6, scaleStep: 0.10, yAmplitude: 80, skewAngle: 8 },
-                    mobile:  { mode: 'absolute', radius: 130, angleStep: Math.PI / 8, scaleStep: 0.08, yAmplitude: 60, skewAngle: 6 }
+                    mobile:  { mode: 'absolute', radius: 155, angleStep: Math.PI / 8, scaleStep: 0.08, yAmplitude: 60, skewAngle: 6 }
                 }
             };
 
