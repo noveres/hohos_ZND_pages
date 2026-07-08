@@ -24,7 +24,7 @@
 
             /* 背景圖（art-direction：桌機 / 手機分別換） */
             --hc-bg-desktop: url('https://res.cloudinary.com/lmbtctmx/image/upload/v1783397768/260701bg.png');
-            --hc-bg-mobile: url('https://res.cloudinary.com/lmbtctmx/image/upload/v1783390923/260701bg-mobile.png'); /* 手機直式版（長寬對換） */
+            --hc-bg-mobile: url('https://res.cloudinary.com/lmbtctmx/image/upload/v1783478786/260701bg-mobile-v2.png'); /* 手機直式版（長寬對換） */
 
             display: block;
             width: 100%;
@@ -244,13 +244,33 @@
                 width: 96%;
             }
 
-            .hoho-carousel .hc-title-top {
+            /* 標題改絕對定位：picture 當「佔位框」(同寬×原圖比例)保住原本空間，img 絕對定位填入
+               → 之後可用 top/left 自由移動標題，不影響其他元素目前位置 */
+            .hoho-carousel .hc-main > picture {
+                position: relative;
                 width: clamp(120px, 80vw, 420px);   /* 與內文圖同寬 */
-                margin-top: 5rem;                   /* 上方間距（原 1rem，下移多 2rem） */
+                aspect-ratio: 4208 / 528;           /* 手機標題圖比例，保留原本高度 */
+                margin-top: 3rem;                   /* 上方間距（由佔位框撐出） */
+                flex-shrink: 0;
+            }
+
+            .hoho-carousel .hc-title-top {
+                position: absolute;
+                top: 2rem;                             /* ← 改這裡上下移動標題 */
+                left: 0;                            /* ← 改這裡左右移動標題 */
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                object-fit: contain;
             }
 
             .hoho-carousel .hc-title-bottom {
                 width: clamp(120px, 80vw, 420px);
+            }
+
+            /* 內文 + 按鈕整組往上推一點點 */
+            .hoho-carousel .hc-bottom-area {
+                margin-top: -1.2rem;
             }
 
             .hoho-carousel .hc-bottom-buttons button img {
