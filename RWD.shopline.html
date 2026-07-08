@@ -202,6 +202,11 @@
                 max-height: none;
             }
 
+            /* 內文 + 按鈕整組往上移（用 transform：只視覺位移、不擠壓容器/不影響排版；可調） */
+            .hoho-carousel .hc-bottom-area {
+                transform: translateY(-3cqh);
+            }
+
             /* 按鈕群：往上移；間距用固定 px（與按鈕大小脫鉤 → 縮小時兩按鈕相對距離不變） */
             .hoho-carousel .hc-bottom-buttons {
                 margin-top: -1.5cqh;   /* 往上移（可調） */
@@ -270,7 +275,7 @@
 
             /* 內文 + 按鈕整組往上推一點點 */
             .hoho-carousel .hc-bottom-area {
-                margin-top: -1.5rem;
+                margin-top: -1.2rem;
             }
 
             .hoho-carousel .hc-bottom-buttons button img {
